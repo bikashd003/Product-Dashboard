@@ -21,10 +21,10 @@ const saveProducts = async (req, res) => {
 
 
 const getTransactions = async (req, res) => {
-    const { search, page = 1, limit = 10 } = req.query;
+    const { search, page = 1, limit = 10, month } = req.query;
     try {
         const skip = (page - 1) * limit;
-   
+
         let query = {};
         if (search) {
             query.$or = [
@@ -35,6 +35,24 @@ const getTransactions = async (req, res) => {
             if (!isNaN(parsedSearch)) {
                 query.$or.push({ price: parsedSearch });
             }
+        }
+        if (month) {
+            const pipeline = [
+                {
+                    $addFields: {
+                        month: { $month: "$dateOfSale" },
+                    }
+                },
+                {
+                    $match: {
+                        month: parseInt(month)
+                    }
+                }
+            ];
+
+            const result = await Product.aggregate(pipeline);
+            const ids = result.map(item => item._id);
+            query._id = { $in: ids };
         }
         const transactions = await Product.find(query)
             .skip(skip)
@@ -107,8 +125,7 @@ const getPieChartData = async (req, res) => {
         const pipeline = [
             {
                 $addFields: {
-                    month: { $month: "$dateOfSale" },
-                    day: { $dayOfMonth: "$dateOfSale" }
+                    month: { $month: "$dateOfSale" }
                 }
             },
             {
@@ -145,7 +162,6 @@ const getPieChartData = async (req, res) => {
 const getBarChartData = async (req, res) => {
     try {
         const { month } = req.query;
-        const monthRegex = new RegExp(`-${month}-`, "i");
 
         const pipeline = [
             {

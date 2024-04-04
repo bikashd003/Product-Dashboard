@@ -1,8 +1,18 @@
+import Navbar from "./Components/Navbar";
+import Product from "./Pages/Product";
+import { ProductProvider } from "./Context/ProductStore";
 
 const App = () => {
   return (
-    <div>App</div>
-  )
-}
+    <>
+      <ProductProvider>
+        <div>
+          <Navbar />
+          <Product />
+        </div>
+      </ProductProvider>
+    </>
+  );
+};
 
-export default App
+export default App;
