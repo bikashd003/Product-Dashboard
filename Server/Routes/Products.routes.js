@@ -1,4 +1,4 @@
-import {saveProducts,getTransactions,getBarChartData,getStatistics,getPieChartData} from "../Controllers/Products.controller.js"
+import {saveProducts,getTransactions,getBarChartData,getStatistics,getPieChartData,getIntegratedData} from "../Controllers/Products.controller.js"
 import {Router} from "express"
 
 
@@ -8,4 +8,5 @@ productRouter.get("/api/get-transactions", getTransactions)
 productRouter.get("/api/bar-chart", getBarChartData);
 productRouter.get("/api/pie-chart", getPieChartData);
 productRouter.get("/api/get-statistics", getStatistics);
+productRouter.get("/api/integrated", getIntegratedData);
 export default productRouter

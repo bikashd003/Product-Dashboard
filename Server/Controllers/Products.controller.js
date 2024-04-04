@@ -7,8 +7,6 @@ const saveProducts = async (req, res) => {
             "https://s3.amazonaws.com/roxiler.com/product_transaction.json"
         );
         const products = response.data;
-
-        // Insert products into the database
         await Product.insertMany(products);
 
         res.status(200).json({ message: "Products saved successfully" });
@@ -72,7 +70,6 @@ const getTransactions = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
-//create a getStatics controller where - Total sale amount of selected month - Total number of sold items of selected month - Total number of not sold items of selected month
 const getStatistics = async (req, res) => {
 
     try {
@@ -104,8 +101,6 @@ const getStatistics = async (req, res) => {
                 }
             }
         ];
-
-        // Execute the aggregation pipeline
         const result = await Product.aggregate(pipeline);
         res.status(200).json(result);
 
@@ -213,4 +208,30 @@ const getBarChartData = async (req, res) => {
     }
 };
 
-export { saveProducts, getTransactions, getBarChartData, getStatistics, getPieChartData };
+const getIntegratedData = async (req, res) => {
+    try {
+      const { month } = req.query;
+      const baseUrl = `http://localhost:5050/api`; 
+  
+      const [transactions, statistics, barChart, pieChart] = await Promise.all([
+        axios.get(`${baseUrl}/get-transactions?month=${month}`),
+        axios.get(`${baseUrl}/get-statistics?month=${month}`),
+        axios.get(`${baseUrl}/bar-chart?month=${month}`),
+        axios.get(`${baseUrl}/pie-chart?month=${month}`),
+      ]);
+  
+      const integratedData = {
+        transactions: transactions.data,
+        statistics: statistics.data,
+        barChart: barChart.data,
+        pieChart: pieChart.data,
+      };
+  
+      res.status(200).json(integratedData);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };
+  
+export { saveProducts, getTransactions, getBarChartData, getStatistics, getPieChartData,getIntegratedData };
